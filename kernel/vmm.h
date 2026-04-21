@@ -10,25 +10,14 @@
 #define PAGE_USER       0x4
 #define PAGE_WRITEBACK  0x8
 #define PAGE_NOCACHE    0x10
+#define PAGE_FRAME_MASK 0xFFFFF000
 
 typedef struct {
-    uint32_t present    : 1;   
-    uint32_t rw         : 1;   
-    uint32_t user       : 1;   
-    uint32_t accessed   : 1;   
-    uint32_t dirty      : 1;   
-    uint32_t unused     : 1;   
-    uint32_t large_page : 1;   
-    uint32_t global     : 1;   
-    uint32_t addr       : 20;  
-} __attribute__((packed)) page_entry_t;
-
-typedef struct {
-    page_entry_t entries[1024];
+    uint32_t entries[1024];
 } __attribute__((aligned(PAGE_SIZE))) page_table_t;
 
 typedef struct {
-    page_entry_t entries[1024];
+    uint32_t entries[1024];
 } __attribute__((aligned(PAGE_SIZE))) page_directory_t;
 
 extern page_directory_t* current_directory;
