@@ -200,7 +200,7 @@ static void terminal_execute_command(void) {
     }
 
     if (strcmp(terminal_input, "help") == 0) {
-        terminal_write_line("Commands: help clear about mem heaptest");
+        terminal_write_line("Commands:\n help\n clear\n about\n mem\n heaptest");
     } else if (strcmp(terminal_input, "clear") == 0) {
         vga_terminal_init();
     } else if (strcmp(terminal_input, "about") == 0) {
