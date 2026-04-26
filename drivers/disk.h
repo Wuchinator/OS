@@ -22,6 +22,7 @@
 
 
 #define ATA_SR_BSY  0x80
+#define ATA_SR_DF   0x20
 #define ATA_SR_DRQ  0x08
 #define ATA_SR_ERR  0x01
 
@@ -53,8 +54,5 @@ int disk_read(int drive, uint32_t lba, uint8_t* buffer, uint32_t count);
 
 
 int disk_write(int drive, uint32_t lba, const uint8_t* buffer, uint32_t count);
-
-
-static int disk_wait_ready(void);
 
 #endif 
