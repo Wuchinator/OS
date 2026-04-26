@@ -8,6 +8,7 @@
 #include "../drivers/serial.h"
 #include "../drivers/timer.h"
 #include "../drivers/keyboard.h"
+#include "../drivers/disk.h"
 #include "io.h"
 #include "stddef.h"
 #include "stdio.h"
@@ -190,6 +191,42 @@ static void terminal_print_memory_status(void) {
     terminal_write_line(line);
 }
 
+static void terminal_print_disk_status(void) {
+    char line[128];
+    disk_info_t info;
+
+    for (int drive = 0; drive < 2; drive++) {
+        if (disk_get_info(drive, &info) != 0) {
+            snprintf(line, sizeof(line), "ata%d: no drive", drive);
+            terminal_write_line(line);
+            continue;
+        }
+
+        snprintf(line, sizeof(line),
+                 "ata%d: %s, %u sectors (%u MiB)",
+                 drive,
+                 info.is_atapi ? "ATAPI" : "ATA",
+                 info.size_sectors,
+                 info.size_sectors / 2048);
+        terminal_write_line(line);
+
+        snprintf(line, sizeof(line),
+                 "  model: %s",
+                 info.model[0] ? info.model : "(unknown)");
+        terminal_write_line(line);
+
+        snprintf(line, sizeof(line),
+                 "  serial: %s",
+                 info.serial[0] ? info.serial : "(unknown)");
+        terminal_write_line(line);
+
+        snprintf(line, sizeof(line),
+                 "  firmware: %s",
+                 info.firmware[0] ? info.firmware : "(unknown)");
+        terminal_write_line(line);
+    }
+}
+
 static void terminal_execute_command(void) {
     terminal_input[terminal_input_len] = '\0';
     terminal_newline();
@@ -200,13 +237,15 @@ static void terminal_execute_command(void) {
     }
 
     if (strcmp(terminal_input, "help") == 0) {
-        terminal_write_line("Commands:\n help\n clear\n about\n mem\n heaptest");
+        terminal_write_line("Commands:\n help\n clear\n about\n mem\n heaptest\n disk");
     } else if (strcmp(terminal_input, "clear") == 0) {
         vga_terminal_init();
     } else if (strcmp(terminal_input, "about") == 0) {
         terminal_write_line("Custom 32-bit hobby OS kernel");
     } else if (strcmp(terminal_input, "mem") == 0) {
         terminal_print_memory_status();
+    } else if (strcmp(terminal_input, "disk") == 0) {
+        terminal_print_disk_status();
     } else if (strcmp(terminal_input, "heaptest") == 0) {
         if (memory_self_test() == 0) {
             terminal_write_line("Heap self-test passed.");
@@ -279,6 +318,7 @@ void kernel_main(void) {
     serial_init(COM1, 115200);
     idt_init();
     memory_init();
+    disk_init();
     pic_init();
     timer_init(100);
     irq_register_handler(0, timer_irq_handler);
